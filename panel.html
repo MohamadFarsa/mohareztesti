@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>پنل مدیریت مهارز</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#060a14;--surface:#0b1120;--surface2:#0e1626;--surface3:#121d33;
+  --border:#1b2740;--border2:#243254;
+  --accent:#3b82f6;--accent2:#22d3ee;
+  --text:#f1f5f9;--muted:#5b6b8a;--muted2:#8b9bbd;
+  --green:#22c55e;--red:#ef4444;--orange:#f97316;
+  --vaz:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--vaz);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(700px at 85% -10%,rgba(59,130,246,.08) 0%,transparent 60%),radial-gradient(500px at 5% 90%,rgba(34,211,238,.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ===== Top bar ===== */
+.topbar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(11,17,32,.7);backdrop-filter:blur(10px);
+  flex-wrap:wrap;gap:14px;}
+.tb-left{display:flex;align-items:center;gap:14px;}
+.tb-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:17px;flex-shrink:0;}
+.tb-brand b{font-size:14px;font-weight:800;letter-spacing:.03em;display:block;}
+.tb-brand span{font-size:9.5px;color:var(--muted2);letter-spacing:.05em;}
+.tb-title{margin-inline-start:22px;padding-inline-start:22px;border-inline-start:1px solid var(--border);}
+.tb-title h1{font-size:16px;font-weight:800;}
+.tb-title p{font-size:11px;color:var(--muted2);margin-top:2px;}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-icon-btn{width:38px;height:38px;border-radius:11px;background:var(--surface2);border:1px solid var(--border2);
+  color:var(--muted2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.tb-icon-btn:hover{color:var(--text);border-color:var(--accent);}
+.tb-icon-btn svg{width:16px;height:16px;}
+.tb-btn-outline{display:flex;align-items:center;gap:7px;padding:10px 16px;border-radius:11px;
+  background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--vaz);
+  font-size:12.5px;font-weight:600;cursor:pointer;}
+.tb-btn-outline svg{width:14px;height:14px;}
+.tb-btn-primary{display:flex;align-items:center;gap:7px;padding:10px 20px;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:var(--vaz);
+  font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(59,130,246,.3);}
+.tb-btn-primary svg{width:14px;height:14px;}
+
+/* ===== Layout ===== */
+.layout{position:relative;z-index:1;display:flex;align-items:flex-start;gap:22px;padding:22px 28px 100px;max-width:1600px;margin:0 auto;}
+.sidebar{width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;position:sticky;top:22px;}
+.side-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:13px;cursor:pointer;
+  color:var(--muted2);font-size:13px;font-weight:600;transition:all .15s;border:1px solid transparent;}
+.side-item svg{width:17px;height:17px;flex-shrink:0;}
+.side-item:hover{background:var(--surface2);color:var(--text);}
+.side-item.active{background:linear-gradient(135deg,rgba(59,130,246,.16),rgba(34,211,238,.08));
+  border-color:rgba(59,130,246,.3);color:var(--text);}
+.promo-card{margin-top:14px;padding:18px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);}
+.promo-icon{width:38px;height:38px;border-radius:11px;background:rgba(59,130,246,.12);color:var(--accent2);
+  display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.promo-icon svg{width:18px;height:18px;}
+.promo-card b{font-size:12.5px;display:block;margin-bottom:3px;}
+.promo-card p{font-size:10.5px;color:var(--muted2);line-height:1.7;margin-bottom:12px;}
+.promo-btn{width:100%;padding:9px;border-radius:9px;border:1px solid var(--border2);background:transparent;
+  color:var(--text);font-family:var(--vaz);font-size:11px;font-weight:600;cursor:pointer;}
+
+.main-col{flex:1;min-width:0;}
+
+/* ===== Editor shell (tabs + form + preview) ===== */
+.editor-shell{display:flex;align-items:flex-start;gap:18px;}
+.tab-strip{width:170px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:8px;}
+.tab-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:11px;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--muted2);transition:all .15s;}
+.tab-item svg{width:15px;height:15px;flex-shrink:0;}
+.tab-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
+.tab-item.active{background:var(--accent);color:#fff;}
+
+.form-panel{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:22px;}
+.fp-head{margin-bottom:18px;}
+.fp-head h3{font-size:14.5px;font-weight:800;margin-bottom:4px;}
+.fp-head p{font-size:11px;color:var(--muted2);line-height:1.7;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted2);margin-bottom:8px;}
+.field label .req{color:var(--accent2);}
+.field input[type=text],.field input[type=tel],.field input[type=email],.field input[type=url],.field textarea,.field select{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:12px;
+  padding:12px 14px;font-size:13px;color:var(--text);font-family:var(--vaz);}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.field textarea{resize:vertical;min-height:72px;line-height:1.8;}
+.char-count{text-align:left;font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--mono);}
+.field-row{display:flex;gap:12px;}
+.field-row .field{flex:1;}
+
+.photo-row{display:flex;align-items:center;gap:16px;margin-top:6px;}
+.photo-circle{width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--surface3);
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--border2);color:var(--muted);}
+.photo-circle img{width:100%;height:100%;object-fit:cover;}
+.photo-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:10px;font-size:11.5px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text);font-family:var(--vaz);}
+.photo-btn svg{width:13px;height:13px;}
+.photo-btn.del{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06);}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+.toggle-text b{font-size:12.5px;display:block;margin-bottom:2px;}
+.toggle-text span{font-size:10.5px;color:var(--muted2);}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:100%;height:100%;position:absolute;cursor:pointer;margin:0;z-index:1;}
+.toggle-track{position:absolute;inset:0;background:var(--border2);border-radius:100px;transition:.2s;pointer-events:none;}
+.toggle-track::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;right:3px;transition:.2s;}
+.toggle input:checked+.toggle-track{background:var(--accent);}
+.toggle input:checked+.toggle-track::after{transform:translateX(-18px);}
+
+/* Preview phone (persistent live) */
+.preview-col{width:280px;flex-shrink:0;position:sticky;top:22px;}
+.phone-mock{width:100%;aspect-ratio:9/18.5;background:#000;border-radius:38px;padding:10px;
+  box-shadow:0 30px 70px rgba(0,0,0,.5);border:2px solid #1a2740;}
+.phone-screen{width:100%;height:100%;border-radius:28px;overflow:hidden;position:relative;background:var(--p-surface,#0b1120);}
+.phone-statusbar{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 2px;font-size:10px;color:#fff;font-family:var(--mono);}
+.phone-content{padding:20px 18px;text-align:center;position:relative;overflow:hidden;height:100%;}
+.pv-avatar-wrap{position:relative;width:68px;height:68px;margin:10px auto 10px;}
+.pv-avatar{width:100%;height:100%;border-radius:50%;padding:3px;background:conic-gradient(from 180deg,var(--p-accent,#3b82f6),var(--p-accent2,#22d3ee),var(--p-accent,#3b82f6));}
+.pv-avatar>div,.pv-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:#0d1526;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);border:2px solid var(--p-surface,#0b1120);}
+.pv-badge{position:absolute;bottom:-1px;left:-1px;width:16px;height:16px;border-radius:50%;background:var(--p-accent,#3b82f6);
+  border:2px solid var(--p-surface,#0b1120);display:flex;align-items:center;justify-content:center;}
+.pv-badge svg{width:8px;height:8px;color:#fff;}
+.pv-name{font-size:13.5px;font-weight:800;color:#f1f5f9;}
+.pv-role{font-size:9.5px;color:var(--p-accent2,#22d3ee);margin-top:2px;}
+.pv-bio{font-size:8.5px;color:#8b9bbd;margin-top:7px;line-height:1.7;padding:0 6px;}
+.pv-quick{display:flex;justify-content:center;gap:6px;margin-top:14px;}
+.pv-q-circle{width:26px;height:26px;border-radius:9px;background:#131f38;display:flex;align-items:center;justify-content:center;color:var(--p-accent2,#22d3ee);}
+.pv-q-circle svg{width:11px;height:11px;}
+.pv-save-btn{margin-top:16px;padding:9px;border-radius:10px;font-size:10px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--p-accent,#3b82f6),var(--p-accent2,#22d3ee));display:flex;align-items:center;justify-content:center;gap:6px;}
+.pv-save-btn svg{width:11px;height:11px;}
+.pv-foot{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:7.5px;color:#4a5a72;font-family:var(--mono);}
+
+.info-cards{margin-top:16px;display:flex;flex-direction:column;gap:14px;}
+.info-card{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:16px;}
+.info-card-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;margin-bottom:10px;}
+.info-card-title svg{width:14px;height:14px;color:var(--accent2);}
+.tip-line{display:flex;align-items:flex-start;gap:7px;font-size:10.5px;color:var(--muted2);line-height:1.7;margin-bottom:7px;}
+.tip-line svg{width:12px;height:12px;color:var(--green);flex-shrink:0;margin-top:2px;}
+.device-row{display:flex;gap:8px;margin-top:4px;}
+.device-icon{flex:1;padding:10px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;color:var(--muted2);}
+.device-icon svg{width:15px;height:15px;}
+.link-box{display:flex;align-items:center;gap:8px;background:var(--surface3);border:1px solid var(--border2);
+  border-radius:10px;padding:9px 11px;font-size:10.5px;font-family:var(--mono);color:var(--accent2);}
+.link-box span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.link-box svg{width:13px;height:13px;cursor:pointer;flex-shrink:0;color:var(--muted2);}
+
+/* ===== Multi-item lists (social/services/portfolio) ===== */
+.item-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+  border-radius:13px;padding:12px 14px;margin-bottom:9px;}
+.item-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.item-icon svg{width:16px;height:16px;}
+.item-main{flex:1;min-width:0;}
+.item-main input{width:100%;background:transparent;border:none;font-size:12.5px;font-weight:700;color:var(--text);
+  font-family:var(--vaz);padding:2px 0;}
+.item-main input.sub{font-size:11px;font-weight:400;color:var(--muted2);}
+.item-icon-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--border2);background:transparent;
+  color:var(--muted2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.item-icon-btn svg{width:13px;height:13px;}
+.item-icon-btn.del:hover{color:var(--red);border-color:rgba(239,68,68,.4);}
+
+.add-row-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;
+  border-radius:12px;border:1px dashed var(--border2);background:transparent;color:var(--accent2);
+  font-family:var(--vaz);font-size:12.5px;font-weight:700;cursor:pointer;margin-top:6px;}
+.add-row-btn svg{width:14px;height:14px;}
+
+/* Portfolio thumb */
+.pf-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+  border-radius:13px;padding:10px;margin-bottom:9px;}
+.pf-thumb-edit{width:48px;height:48px;border-radius:10px;flex-shrink:0;background:var(--surface3);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;position:relative;}
+.pf-thumb-edit img{width:100%;height:100%;object-fit:cover;}
+.pf-thumb-edit svg{width:16px;height:16px;}
+.pf-thumb-edit input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+/* ===== Color/style swatches ===== */
+.swatch-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.color-swatch{width:34px;height:34px;border-radius:50%;cursor:pointer;position:relative;border:2px solid transparent;
+  display:flex;align-items:center;justify-content:center;transition:border-color .15s;}
+.color-swatch.selected{border-color:var(--text);}
+.color-swatch svg{width:13px;height:13px;color:#fff;opacity:0;}
+.color-swatch.selected svg{opacity:1;}
+.style-row{display:flex;gap:10px;margin-top:8px;}
+.style-card{flex:1;padding:16px 8px;border-radius:13px;border:2px solid var(--border);background:var(--surface3);
+  display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted2);}
+.style-card.selected{border-color:var(--accent);color:var(--text);background:rgba(59,130,246,.06);}
+.style-card svg{width:20px;height:20px;}
+
+/* dashboard */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.dash-card{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:18px;}
+.dash-card .num{font-size:22px;font-weight:800;}
+.dash-card .lbl{font-size:11px;color:var(--muted2);margin-top:4px;}
+.dash-card svg{width:18px;height:18px;color:var(--accent2);margin-bottom:10px;}
+.placeholder-box{text-align:center;padding:60px 20px;color:var(--muted2);}
+.placeholder-box svg{width:40px;height:40px;color:var(--muted);margin-bottom:14px;}
+.placeholder-box p{font-size:12.5px;line-height:1.8;}
+.support-list{display:flex;flex-direction:column;gap:10px;}
+.support-item{display:flex;align-items:center;gap:13px;padding:15px;background:var(--surface3);border:1px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);}
+.support-item svg{width:17px;height:17px;color:var(--accent2);flex-shrink:0;}
+.support-item b{font-size:12.5px;display:block;}
+.support-item span{font-size:10.5px;color:var(--muted2);}
+
+/* ===== Toast ===== */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);
+  border:1px solid var(--border2);border-radius:12px;padding:11px 20px;font-size:12.5px;font-weight:600;
+  display:none;align-items:center;gap:8px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.4);white-space:nowrap;}
+.toast.show{display:flex;animation:slideUp .3s cubic-bezier(.22,1,.36,1) both;}
+.toast.green{color:var(--green);border-color:rgba(34,197,94,.3);}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ===== Modals (GH settings + preview) ===== */
+.overlay{position:fixed;inset:0;background:rgba(2,4,10,.7);backdrop-filter:blur(6px);z-index:300;
+  display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{width:100%;max-width:420px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;
+  max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);}
+.modal-head h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.modal-head h3 svg{width:16px;height:16px;color:var(--accent2);}
+.modal-close{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.05);border:none;color:var(--muted2);
+  cursor:pointer;font-size:16px;}
+.modal-body{padding:20px;overflow-y:auto;}
+.modal-body iframe{width:100%;height:70vh;border:none;border-radius:12px;}
+
+/* Login */
+html:not(.authed) body{overflow:hidden;}
+html.authed .login-overlay{display:none;}
+.login-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(700px at 15% 10%,rgba(59,130,246,.1) 0%,transparent 60%),radial-gradient(600px at 85% 90%,rgba(34,211,238,.1) 0%,transparent 60%),var(--bg);padding:20px;}
+.login-box{width:100%;max-width:380px;padding:40px 34px 32px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:24px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:loginRise .6s cubic-bezier(.22,1,.36,1) both;}
+@keyframes loginRise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-brand{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:22px;}
+.login-icon{width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 36px rgba(59,130,246,.35);}
+.login-icon svg{width:28px;height:28px;color:#fff;}
+.login-badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--accent2);
+  background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:100px;padding:4px 12px;}
+.login-box h2{font-size:20px;font-weight:800;margin-bottom:10px;}
+.login-box p{font-size:12.5px;color:var(--muted2);margin-bottom:24px;line-height:1.9;}
+.login-box input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:13px;
+  padding:15px 18px;font-size:14px;color:var(--text);text-align:center;letter-spacing:.15em;font-family:var(--vaz);margin-bottom:16px;}
+.login-box input:focus{outline:none;border-color:var(--accent);}
+.login-btn{width:100%;padding:15px;border-radius:13px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:var(--vaz);font-size:14px;
+  font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 28px rgba(59,130,246,.28);}
+.login-btn.login-err{background:var(--red) !important;animation:shake .4s;}
+.login-btn.login-ok{background:var(--green) !important;}
+.login-msg{font-size:11.5px;color:var(--red);margin-top:12px;min-height:14px;}
+.login-footer{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9.5px;color:var(--muted);line-height:1.7;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* Light theme */
+body.light{--bg:#f2f5f9;--surface:#fff;--surface2:#fff;--surface3:#f0f3f8;--border:#e3e8f0;--border2:#d4dbe6;--text:#0f172a;--muted:#9aa5b8;--muted2:#5c6b85;}
+body.light .topbar{background:rgba(255,255,255,.85);}
+body.light .field input,body.light .field textarea,body.light .field select{background:#fff;}
+body.light .item-row,body.light .support-item,body.light .device-icon,body.light .link-box{background:#fff;}
+body.light .toast{background:#fff;box-shadow:0 10px 30px rgba(15,23,42,.15);}
+
+/* Bottom mobile nav */
+.bottom-nav{display:none;}
+
+/* ===== Tablet & below: stack layout ===== */
+@media (max-width:1100px){
+  .layout{flex-direction:column;padding:18px 20px 90px;}
+  .sidebar{position:static;width:100%;flex-direction:row;overflow-x:auto;padding-bottom:6px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .sidebar::-webkit-scrollbar{display:none;}
+  .side-item{white-space:nowrap;flex-shrink:0;}
+  .promo-card{display:none;}
+  .editor-shell{flex-direction:column;}
+  .tab-strip{width:100%;flex-direction:row;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .tab-strip::-webkit-scrollbar{display:none;}
+  .tab-item{flex-shrink:0;}
+  .preview-col{width:100%;max-width:320px;margin:0 auto;position:static;}
+  .dash-grid{grid-template-columns:1fr 1fr;}
+}
+
+/* ===== Mobile: bottom nav takes over, sidebar hidden ===== */
+@media (max-width:720px){
+  .topbar{padding:12px 14px;flex-wrap:nowrap;}
+  .tb-title{display:none;}
+  .tb-brand span{display:none;}
+  .tb-right{gap:6px;}
+  .tb-btn-outline span,.tb-btn-outline{font-size:0;padding:10px;gap:0;}
+  .tb-btn-outline svg{margin:0;}
+  .tb-btn-primary{font-size:11.5px;padding:10px 14px;}
+
+  .layout{padding:14px 12px 84px;gap:14px;}
+  .sidebar{display:none;}
+  .form-panel{padding:16px;border-radius:16px;}
+  .fp-head h3{font-size:13.5px;}
+  .field-row{flex-direction:column;gap:0;}
+  .dash-grid{grid-template-columns:1fr;gap:10px;}
+  .swatch-row{gap:8px;}
+  .style-row{gap:8px;}
+
+  .bottom-nav{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:80;
+    background:rgba(11,17,32,.95);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));gap:2px;
+  }
+  .bottom-nav::-webkit-scrollbar{display:none;}
+  .bn-item{
+    flex:0 0 auto;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;padding:8px 10px;border-radius:12px;cursor:pointer;color:var(--muted2);transition:all .15s;
+  }
+  .bn-item svg{width:19px;height:19px;flex-shrink:0;}
+  .bn-item span{font-size:9.5px;font-weight:600;white-space:nowrap;}
+  .bn-item.active{color:var(--accent);background:rgba(59,130,246,.1);}
+
+  /* modals go near-fullscreen on phones */
+  .overlay{padding:0;align-items:flex-end;}
+  .modal{max-width:100%;width:100%;border-radius:22px 22px 0 0;max-height:92vh;}
+  .modal-body iframe{height:60vh;}
+
+  .login-box{padding:32px 22px 26px;}
+}
+@media (max-width:420px){
+  .preview-col{max-width:260px;}
+  .dash-card .num{font-size:18px;}
+}
+</style></head>
+<body>
+
+<script>
+if(localStorage.getItem('moharez_panel_theme')==='light')document.body.classList.add('light');
+if(localStorage.getItem('moharez_panel_auth')==='true')document.documentElement.classList.add('authed');
+</script>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-brand">
+      <div class="login-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+      <div class="login-badge">MOHAREZ · PANEL</div>
+    </div>
+    <h2>پنل مدیریت مهارز</h2>
+    <p>محیط اختصاصی مدیریت کارت دیجیتال شما — برای دسترسی، هویت خود را تایید کنید.</p>
+    <input type="password" id="loginPass" placeholder="رمز عبور" autocomplete="off" onkeydown="if(event.key==='Enter')attemptLogin()"/>
+    <button class="login-btn" id="loginBtn" onclick="attemptLogin()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      <span>ورود به پنل</span>
+    </button>
+    <div class="login-msg" id="loginMsg"></div>
+    <div class="login-footer">دسترسی محدود به مدیر مجموعه — تمامی فعالیت‌ها ثبت می‌شود.</div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo">M</div>
+    <div class="tb-brand"><b>MOHAREZ</b><span>Digital Business Card</span></div>
+    <div class="tb-title">
+      <h1 id="pageTitle">ویرایش صفحه دیجیتال</h1>
+      <p id="pageSub">در این بخش می‌توانید تمام اطلاعات صفحه دیجیتال خود را ویرایش کنید. تغییرات به‌صورت لحظه‌ای اعمال می‌شوند.</p>
+    </div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-icon-btn" onclick="togglePanelTheme()" title="تغییر تم">
+      <svg id="panelThemeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </div>
+    <button class="tb-btn-outline" onclick="openPreviewModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      پیش‌نمایش صفحه
+    </button>
+    <button class="tb-btn-primary" onclick="saveToGitHub()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      ذخیره تغییرات
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebarNav"></aside>
+
+  <div class="main-col" id="mainCol"></div>
+</div>
+
+<!-- Bottom Nav (mobile) -->
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<!-- Toast -->
+<div class="toast green" id="toast">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">ذخیره شد!</span>
+</div>
+
+<!-- Preview Modal -->
+<div class="overlay" id="previewOverlay">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>پیش‌نمایش کامل</h3>
+      <button class="modal-close" onclick="closePreviewModal()">×</button>
+    </div>
+    <div class="modal-body"><iframe id="previewFrame" src="about:blank"></iframe></div>
+  </div>
+</div>
+
+<!-- GitHub Settings Modal -->
+<div class="overlay" id="ghOverlay">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-head">
+      <h3><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>اتصال گیت‌هاب</h3>
+      <button class="modal-close" onclick="closeGHModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="ghStatus" style="font-family:var(--mono);font-size:11px;color:var(--muted2);margin-bottom:16px;padding:10px 12px;background:rgba(255,255,255,.02);border:1px solid var(--border2);border-radius:9px;">متصل نیست</div>
+      <div class="field-row">
+        <div class="field"><label>نام کاربری گیت‌هاب</label><input type="text" id="gh_owner" placeholder="mohamadfarsa"/></div>
+        <div class="field"><label>نام ریپازیتوری</label><input type="text" id="gh_repo" placeholder="moharez-card"/></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Branch</label><input type="text" id="gh_branch" value="main"/></div>
+        <div class="field"><label>مسیر فایل</label><input type="text" id="gh_path" value="data.json"/></div>
+      </div>
+      <div class="field"><label>Personal Access Token</label><input type="password" id="gh_token" placeholder="ghp_..."/></div>
+      <button class="tb-btn-primary" style="width:100%;justify-content:center;" onclick="saveGHConfig()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ذخیره تنظیمات اتصال
+      </button>
+      <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:12px;line-height:1.8;">
+        توکن فقط در همین مرورگر ذخیره می‌شود. با دسترسی محدود «Contents: Read and write» روی همین ریپو بسازید.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════ Icons & Presets ═══════════════════════
+const ICONS = {
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  edit:'<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/>',
+  link:'<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>',
+  palette:'<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.5-1.1-.3-.3-.5-.7-.5-1.1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-9-10-9z"/>',
+  chart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  headset:'<path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>',
+  logout:'<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  nfc:'<path d="M6.34 17.66a8 8 0 010-11.32"/><path d="M9.17 14.83a4 4 0 010-5.66"/><circle cx="12" cy="12" r="1"/><path d="M14.83 9.17a4 4 0 010 5.66"/><path d="M17.66 6.34a8 8 0 010 11.32"/>',
+  user:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  services:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  portfolio:'<path d="M2 3h6l2 3h12v13a2 2 0 01-2 2H4a2 2 0 01-2-2V3z"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .99h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16z"/>',
+  mail:'<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
+  sliders:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+  camera:'<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',
+  trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a2 2 0 012-2h0a2 2 0 012 2v2"/>',
+  upload:'<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>',
+  lightbulb:'<line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>',
+  monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  tablet:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  mobile:'<rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
+  award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/>',
+  briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>',
+  sun:'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+  moon:'<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>',
+  github:'<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>',
+  telegram:'<path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.674l-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.98.885z"/>',
+  whatsapp:'<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>',
+  instagram:'<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>',
+  linkedin:'<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>',
+  twitter:'<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>',
+  code:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  app:'<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  design:'<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.5-1.1-.3-.3-.5-.7-.5-1.1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-9-10-9z"/>',
+  consult:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+  layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  square:'<rect x="3" y="3" width="18" height="18" rx="6"/>',
+  droplet:'<path d="M12 2.69s5.66 6.14 5.66 9.8a5.66 5.66 0 01-11.32 0c0-3.66 5.66-9.8 5.66-9.8z"/>'
+};
+function icon(name, size, strokeW){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeW||2}" stroke-linecap="round" stroke-linejoin="round" width="${size||16}" height="${size||16}">${ICONS[name]||''}</svg>`; }
+function iconFill(name, size){ return `<svg viewBox="0 0 24 24" fill="currentColor" width="${size||16}" height="${size||16}">${ICONS[name]||''}</svg>`; }
+function esc(s){ return s==null?'':String(s); }
+
+const ACCENT_PRESETS = {
+  blue:   { name:'آبی',    a:'#3b82f6', a2:'#22d3ee' },
+  purple: { name:'بنفش',   a:'#8b5cf6', a2:'#c084fc' },
+  green:  { name:'سبز',    a:'#22c55e', a2:'#4ade80' },
+  orange: { name:'نارنجی', a:'#f97316', a2:'#fb923c' },
+  red:    { name:'قرمز',   a:'#ef4444', a2:'#f87171' },
+  pink:   { name:'صورتی',  a:'#ec4899', a2:'#f472b6' },
+  black:  { name:'مشکی',   a:'#334155', a2:'#64748b' },
+  gray:   { name:'خاکستری',a:'#64748b', a2:'#94a3b8' },
+  white:  { name:'سفید',   a:'#e2e8f0', a2:'#cbd5e1' }
+};
+const CARD_STYLES = {
+  classic: { name:'کلاسیک', icon:'square' },
+  modern:  { name:'مدرن',   icon:'layers' },
+  glass:   { name:'گلس',    icon:'droplet' }
+};
+
+const DEFAULT_DATA = {
+  name:'', job:'', verified:false, bio:'', tags:[],
+  phones:[{label:'موبایل',value:''}], emails:[{label:'کاری',value:''}], websites:[],
+  social:{ telegram:'', whatsapp:'', instagram:'', github:'', linkedin:'', twitter:'' },
+  location:{ city:'', address:'', mapLink:'' },
+  music:{ trackName:'', trackArtist:'', fileBase64:'' },
+  photoBase64:'',
+  about:{ skills:[], experience:'', education:'', resumeLink:'' },
+  services:[], portfolio:[],
+  theme:{ cardColor:'#0d1117', heroColor:'#0d1117', accentPreset:'blue', cardStyle:'classic' },
+  toggles:{ music:true, vcard:true, location:true, email:true, website:true, bio:true, about:true, services:true, portfolio:true, social:true, themePicker:true }
+};
+
+var CARD = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentView = 'editor';
+let currentTab = 'main';
+
+function deepMerge(base, override){
+  const result = Object.assign({}, base);
+  for(const key in override){
+    const bv = base ? base[key] : undefined;
+    const ov = override[key];
+    if(ov && typeof ov === 'object' && !Array.isArray(ov) && bv && typeof bv === 'object' && !Array.isArray(bv)){
+      result[key] = deepMerge(bv, ov);
+    } else {
+      result[key] = ov;
+    }
+  }
+  return result;
+}
+
+// ═══════════════════════ Sidebar ═══════════════════════
+const SIDEBAR_ITEMS = [
+  { key:'dashboard', label:'داشبورد', icon:'dashboard', view:'dashboard' },
+  { key:'editor',    label:'ویرایش صفحه', icon:'edit', view:'editor', tab:'main' },
+  { key:'social',    label:'لینک‌ها و شبکه‌های اجتماعی', icon:'link', view:'editor', tab:'social' },
+  { key:'appearance',label:'تنظیمات ظاهر و استایل', icon:'palette', view:'editor', tab:'appearance' },
+  { key:'stats',     label:'آمار بازدید', icon:'chart', view:'stats' },
+  { key:'support',   label:'پشتیبانی', icon:'headset', view:'support' }
+];
+function renderSidebar(){
+  const isItemActive = (it) => it.key==='editor'
+    ? (currentView==='editor' && currentTab!=='social' && currentTab!=='appearance')
+    : (currentView===it.view);
+
+  const items = SIDEBAR_ITEMS.map(it =>
+    `<div class="side-item ${isItemActive(it)?'active':''}" onclick="sidebarGo('${it.key}')">${icon(it.icon,17)}<span>${it.label}</span></div>`
+  ).join('') + `<div class="side-item" onclick="logoutPanel()">${icon('logout',17)}<span>خروج</span></div>`;
+
+  const promo = `
+    <div class="promo-card">
+      <div class="promo-icon">${icon('nfc',18)}</div>
+      <b>کارت هوشمند NFC</b>
+      <p>به دنیای دیجیتال متصل شوید و کارتتان را حرفه‌ای‌تر کنید.</p>
+      <button class="promo-btn" onclick="showToast('برای سفارش کارت NFC با پشتیبانی در تماس باشید')">مشاهده راهنما</button>
+    </div>`;
+
+  document.getElementById('sidebarNav').innerHTML = items + promo;
+
+  // mobile bottom nav mirrors sidebar (icons only)
+  document.getElementById('bottomNav').innerHTML = SIDEBAR_ITEMS.map(it =>
+    `<div class="bn-item ${isItemActive(it)?'active':''}" onclick="sidebarGo('${it.key}')">${icon(it.icon,18)}<span>${it.label.split(' ')[0]}</span></div>`
+  ).join('') + `<div class="bn-item" onclick="logoutPanel()">${icon('logout',18)}<span>خروج</span></div>`;
+}
+function sidebarGo(key){
+  const it = SIDEBAR_ITEMS.find(x=>x.key===key);
+  if(!it) return;
+  currentView = it.view;
+  if(it.tab) currentTab = it.tab;
+  renderAll();
+}
+
+// ═══════════════════════ Main dispatch ═══════════════════════
+function renderAll(){
+  renderSidebar();
+  const el = document.getElementById('mainCol');
+  if(currentView === 'dashboard') el.innerHTML = renderDashboard();
+  else if(currentView === 'stats') el.innerHTML = renderStats();
+  else if(currentView === 'support') el.innerHTML = renderSupport();
+  else el.innerHTML = renderEditorShell();
+  if(currentView === 'editor') renderPreview();
+  updatePageHeader();
+}
+function updatePageHeader(){
+  const titles = {
+    dashboard:['داشبورد','نمای کلی وضعیت کارت دیجیتال شما'],
+    editor:['ویرایش صفحه دیجیتال','در این بخش می‌توانید تمام اطلاعات صفحه دیجیتال خود را ویرایش کنید. تغییرات به‌صورت لحظه‌ای اعمال می‌شوند.'],
+    stats:['آمار بازدید','بررسی میزان تعامل بازدیدکنندگان با کارت شما'],
+    support:['پشتیبانی','در صورت بروز هرگونه مشکل با ما در ارتباط باشید']
+  };
+  const t = titles[currentView] || titles.editor;
+  document.getElementById('pageTitle').textContent = t[0];
+  document.getElementById('pageSub').textContent = t[1];
+}
+
+// ═══════════════════════ Editor shell ═══════════════════════
+const TABS = [
+  { key:'main',      label:'اطلاعات اصلی', icon:'user' },
+  { key:'photo',     label:'تصویر و لوگو', icon:'camera' },
+  { key:'about',     label:'درباره من', icon:'info' },
+  { key:'services',  label:'خدمات', icon:'services' },
+  { key:'portfolio', label:'نمونه‌کارها', icon:'portfolio' },
+  { key:'social',    label:'شبکه‌های اجتماعی', icon:'link' },
+  { key:'contact',   label:'اطلاعات تماس', icon:'phone' },
+  { key:'location',  label:'موقعیت مکانی', icon:'pin' },
+  { key:'appearance',label:'استایل و ظاهر', icon:'palette' },
+  { key:'advanced',  label:'تنظیمات پیشرفته', icon:'sliders' }
+];
+function renderEditorShell(){
+  const tabsHTML = TABS.map(t=>`<div class="tab-item ${currentTab===t.key?'active':''}" onclick="goTab('${t.key}')">${icon(t.icon,15)}<span>${t.label}</span></div>`).join('');
+  return `
+  <div class="editor-shell">
+    <div class="tab-strip">${tabsHTML}</div>
+    <div class="form-panel" id="formPanel">${renderTabContent(currentTab)}</div>
+    <div class="preview-col">
+      <div class="phone-mock"><div class="phone-screen" id="phoneScreen"></div></div>
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-card-title">${icon('lightbulb',14)}نکات مهم</div>
+          <div class="tip-line">${icon('check',12)}اندازه عکس پروفایل: حداقل ۴۰۰×۴۰۰ پیکسل</div>
+          <div class="tip-line">${icon('check',12)}فرمت‌های قابل قبول: JPG, PNG</div>
+          <div class="tip-line">${icon('check',12)}حجم فایل: کمتر از ۲ مگابایت</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">${icon('monitor',14)}نمایش در دستگاه‌های مختلف</div>
+          <div class="device-row">
+            <div class="device-icon">${icon('monitor',16)}</div>
+            <div class="device-icon">${icon('tablet',16)}</div>
+            <div class="device-icon">${icon('mobile',16)}</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">${icon('link',14)}لینک صفحه شما</div>
+          <div class="link-box"><span id="cardLinkText">${esc(location.href.replace(/panel\\.html.*$/,''))}</span>${icon('copy',13)}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function goTab(key){
+  currentTab = key;
+  document.getElementById('formPanel').innerHTML = renderTabContent(key);
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  renderSidebar();
+  const tEl = [...document.querySelectorAll('.tab-item')].find(t=>t.textContent.trim()===TABS.find(x=>x.key===key).label);
+  if(tEl) tEl.classList.add('active');
+}
+
+// ═══════════════════════ Field change handling ═══════════════════════
+function onFieldChange(){
+  renderPreview();
+  markUnsaved();
+  saveLocalPanelData();
+}
+function setDeep(path, value){
+  const parts = path.split('.');
+  let obj = CARD;
+  for(let i=0;i<parts.length-1;i++){ obj = obj[parts[i]]; }
+  obj[parts[parts.length-1]] = value;
+  onFieldChange();
+}
+
+// ═══════════════════════ Tab content dispatch ═══════════════════════
+function renderTabContent(tab){
+  const map = {
+    main: tabMain, photo: tabPhoto, about: tabAbout, services: tabServices,
+    portfolio: tabPortfolio, social: tabSocial, contact: tabContact,
+    location: tabLocation, appearance: tabAppearance, advanced: tabAdvanced
+  };
+  return (map[tab] || tabMain)();
+}
+
+function tabMain(){
+  return `
+    <div class="fp-head"><h3>اطلاعات اصلی</h3><p>اطلاعاتی که در بالای صفحه نمایش داده می‌شود.</p></div>
+    <div class="field"><label>نام و نام خانوادگی <span class="req">*</span></label>
+      <input type="text" value="${esc(CARD.name)}" oninput="setDeep('name',this.value)"/></div>
+    <div class="field"><label>عنوان شغلی <span class="req">*</span></label>
+      <input type="text" value="${esc(CARD.job)}" oninput="setDeep('job',this.value)"/></div>
+    <div class="field"><label>توضیحات کوتاه (بیوگرافی)</label>
+      <textarea maxlength="160" oninput="setDeep('bio',this.value);document.getElementById('bioCount').textContent=this.value.length+'/160'">${esc(CARD.bio)}</textarea>
+      <div class="char-count" id="bioCount">${(CARD.bio||'').length}/160</div></div>
+    <div class="toggle-row">
+      <div class="toggle-text"><b>نمایش تیک تایید</b><span>در صورت فعال بودن، نشان تایید کنار نام شما نمایش داده می‌شود.</span></div>
+      <label class="toggle"><input type="checkbox" ${CARD.verified?'checked':''} onchange="setDeep('verified',this.checked)"/><div class="toggle-track"></div></label>
+    </div>`;
+}
+
+function tabPhoto(){
+  const has = !!CARD.photoBase64;
+  return `
+    <div class="fp-head"><h3>تصویر و لوگو</h3><p>عکس پروفایلی که در صفحه دیجیتال شما نمایش داده می‌شود.</p></div>
+    <div class="field"><label>عکس پروفایل</label>
+      <div class="photo-row">
+        <div class="photo-circle" id="photoCirclePreview">${has ? `<img src="${CARD.photoBase64}"/>` : icon('user',22)}</div>
+        <label class="photo-btn"><input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"/>${icon('upload',13)}تغییر عکس</label>
+        ${has ? `<button class="photo-btn del" onclick="removePhoto()">${icon('trash',13)}حذف</button>` : ''}
+      </div>
+    </div>
+    <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;line-height:1.8;">در حال حاضر لوگوی جداگانه پشتیبانی نمی‌شود؛ همین عکس پروفایل به‌عنوان تصویر اصلی کارت استفاده می‌شود.</p>`;
+}
+function handlePhotoUpload(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { CARD.photoBase64 = e.target.result; onFieldChange(); goTab('photo'); };
+  reader.readAsDataURL(file);
+}
+function removePhoto(){ CARD.photoBase64=''; onFieldChange(); goTab('photo'); }
+
+function tabAbout(){
+  const a = CARD.about || (CARD.about = {skills:[],experience:'',education:'',resumeLink:''});
+  const skills = a.skills || [];
+  return `
+    <div class="fp-head"><h3>درباره من</h3><p>معرفی کامل‌تر، مهارت‌ها و سوابق شما.</p></div>
+    <div class="field"><label>مهارت‌ها</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;" id="skillTagsWrap">
+        ${skills.map((s,i)=>`<span style="display:flex;align-items:center;gap:5px;background:rgba(59,130,246,.1);color:var(--accent2);border:1px solid rgba(59,130,246,.2);border-radius:100px;padding:4px 6px 4px 10px;font-size:11px;">${esc(s)}<span style="cursor:pointer;" onclick="removeSkill(${i})">×</span></span>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;"><input type="text" id="newSkillInput" placeholder="مهارت جدید..." style="flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:10px;padding:9px 12px;color:var(--text);font-family:var(--vaz);font-size:12px;" onkeydown="if(event.key==='Enter'){addSkill();event.preventDefault();}"/>
+      <button class="photo-btn" onclick="addSkill()">${icon('plus',13)}افزودن</button></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>تجربه کاری</label><input type="text" value="${esc(a.experience)}" placeholder="مثلاً 2+ سال" oninput="setDeep('about.experience',this.value)"/></div>
+      <div class="field"><label>تحصیلات</label><input type="text" value="${esc(a.education)}" oninput="setDeep('about.education',this.value)"/></div>
+    </div>
+    <div class="field"><label>لینک دانلود رزومه</label><input type="url" value="${esc(a.resumeLink)}" placeholder="https://..." oninput="setDeep('about.resumeLink',this.value)"/></div>`;
+}
+function addSkill(){
+  const inp = document.getElementById('newSkillInput');
+  const v = inp.value.trim(); if(!v) return;
+  CARD.about.skills.push(v);
+  onFieldChange(); goTab('about');
+}
+function removeSkill(i){ CARD.about.skills.splice(i,1); onFieldChange(); goTab('about'); }
+
+const SVC_ICON_OPTIONS = ['code','app','design','consult'];
+function tabServices(){
+  const list = CARD.services || (CARD.services = []);
+  return `
+    <div class="fp-head"><h3>ویرایش خدمات</h3><p>خدماتی که به مشتریان خود ارائه می‌دهید را اضافه کنید.</p></div>
+    ${list.map((s,i)=>`
+      <div class="item-row">
+        <div class="item-icon" style="background:rgba(59,130,246,.12);color:var(--accent2);">${icon(s.icon||'code',16)}</div>
+        <div class="item-main">
+          <input type="text" value="${esc(s.title)}" placeholder="عنوان خدمت" oninput="CARD.services[${i}].title=this.value;onFieldChange()"/>
+          <input type="text" class="sub" value="${esc(s.subtitle)}" placeholder="توضیح کوتاه" oninput="CARD.services[${i}].subtitle=this.value;onFieldChange()"/>
+        </div>
+        <select style="background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:10px;padding:5px;" onchange="CARD.services[${i}].icon=this.value;onFieldChange();goTab('services')">
+          ${SVC_ICON_OPTIONS.map(o=>`<option value="${o}" ${o===s.icon?'selected':''}>${o}</option>`).join('')}
+        </select>
+        <button class="item-icon-btn del" onclick="removeService(${i})">${icon('trash',13)}</button>
+      </div>`).join('')}
+    <button class="add-row-btn" onclick="addService()">${icon('plus',14)}افزودن خدمت</button>`;
+}
+function addService(){ CARD.services.push({icon:'code',title:'خدمت جدید',subtitle:''}); onFieldChange(); goTab('services'); }
+function removeService(i){ CARD.services.splice(i,1); onFieldChange(); goTab('services'); }
+
+function tabPortfolio(){
+  const list = CARD.portfolio || (CARD.portfolio = []);
+  return `
+    <div class="fp-head"><h3>مدیریت نمونه‌کارها</h3><p>نمونه‌کارهای خود را اضافه کنید.</p></div>
+    ${list.map((p,i)=>`
+      <div class="pf-row">
+        <div class="pf-thumb-edit">${p.image?`<img src="${p.image}"/>`:icon('image',18)}<input type="file" accept="image/*" onchange="handlePortfolioImage(this,${i})"/></div>
+        <div class="item-main">
+          <input type="text" value="${esc(p.title)}" placeholder="عنوان پروژه" oninput="CARD.portfolio[${i}].title=this.value;onFieldChange()"/>
+          <input type="text" class="sub" value="${esc((p.tags||[]).join(', '))}" placeholder="برچسب‌ها (با کاما جدا کنید)" oninput="CARD.portfolio[${i}].tags=this.value.split(',').map(s=>s.trim()).filter(Boolean);onFieldChange()"/>
+          <input type="url" class="sub" value="${esc(p.link)}" placeholder="لینک پروژه (اختیاری)" oninput="CARD.portfolio[${i}].link=this.value;onFieldChange()"/>
+        </div>
+        <button class="item-icon-btn del" onclick="removePortfolio(${i})">${icon('trash',13)}</button>
+      </div>`).join('')}
+    <button class="add-row-btn" onclick="addPortfolio()">${icon('plus',14)}افزودن نمونه‌کار</button>`;
+}
+function handlePortfolioImage(input, i){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { CARD.portfolio[i].image = e.target.result; onFieldChange(); goTab('portfolio'); };
+  reader.readAsDataURL(file);
+}
+function addPortfolio(){ CARD.portfolio.push({title:'پروژه جدید',tags:[],image:'',link:''}); onFieldChange(); goTab('portfolio'); }
+function removePortfolio(i){ CARD.portfolio.splice(i,1); onFieldChange(); goTab('portfolio'); }
+
+const SOCIAL_DEFS = [
+  { key:'instagram', label:'Instagram', ic:'instagram', color:'#E91E8C', prefix:'@' },
+  { key:'telegram',  label:'Telegram',  ic:'telegram',  color:'#29B6F6', prefix:'@' },
+  { key:'whatsapp',  label:'WhatsApp',  ic:'whatsapp',  color:'#25D366', prefix:'+' },
+  { key:'linkedin',  label:'LinkedIn',  ic:'linkedin',  color:'#0a66c2', prefix:'' },
+  { key:'twitter',   label:'X (Twitter)', ic:'twitter', color:'#e7e9ea', prefix:'@' },
+  { key:'github',    label:'GitHub',    ic:'github',    color:'#C9D1D9', prefix:'' }
+];
+function tabSocial(){
+  const s = CARD.social || (CARD.social={});
+  return `
+    <div class="fp-head"><h3>ویرایش شبکه‌های اجتماعی</h3><p>لینک شبکه‌های اجتماعی خود را وارد یا غیرفعال کنید.</p></div>
+    ${SOCIAL_DEFS.map(d=>`
+      <div class="item-row">
+        <div class="item-icon" style="background:${d.color}22;color:${d.color};">${iconFill(d.ic,16)}</div>
+        <div class="item-main">
+          <div style="font-size:11.5px;font-weight:700;margin-bottom:4px;">${d.label}</div>
+          <input type="text" value="${esc(s[d.key])}" placeholder="یوزرنیم / شماره" oninput="CARD.social['${d.key}']=this.value;onFieldChange()"/>
+        </div>
+        <label class="toggle"><input type="checkbox" ${s[d.key]?'checked':''} onchange="if(!this.checked)CARD.social['${d.key}']='';onFieldChange();goTab('social')"/><div class="toggle-track"></div></label>
+      </div>`).join('')}`;
+}
+
+function tabContact(){
+  const phones = CARD.phones || (CARD.phones=[]);
+  const emails = CARD.emails || (CARD.emails=[]);
+  const loc = CARD.location || (CARD.location={city:'',address:'',mapLink:''});
+  return `
+    <div class="fp-head"><h3>ویرایش اطلاعات تماس</h3><p>شماره تماس و ایمیل شما در صفحه نمایش داده می‌شود.</p></div>
+    <div class="field"><label>شماره تماس</label>
+      ${phones.map((p,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="tel" value="${esc(p.value)}" placeholder="+98 912 345 6789" style="flex:1;" oninput="CARD.phones[${i}].value=this.value;onFieldChange()"/>
+        ${phones.length>1?`<button class="item-icon-btn del" onclick="CARD.phones.splice(${i},1);onFieldChange();goTab('contact')">${icon('trash',13)}</button>`:''}
+      </div>`).join('')}
+      <button class="photo-btn" onclick="CARD.phones.push({label:'موبایل',value:''});onFieldChange();goTab('contact')">${icon('plus',13)}افزودن شماره دیگر</button>
+    </div>
+    <div class="field"><label>ایمیل</label>
+      ${emails.map((e,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="email" value="${esc(e.value)}" placeholder="you@email.com" style="flex:1;" oninput="CARD.emails[${i}].value=this.value;onFieldChange()"/>
+        ${emails.length>1?`<button class="item-icon-btn del" onclick="CARD.emails.splice(${i},1);onFieldChange();goTab('contact')">${icon('trash',13)}</button>`:''}
+      </div>`).join('')}
+      <button class="photo-btn" onclick="CARD.emails.push({label:'کاری',value:''});onFieldChange();goTab('contact')">${icon('plus',13)}افزودن ایمیل دیگر</button>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-text"><b>دکمه ذخیره مخاطب</b><span>در صفحه اصلی برای ثبت اطلاعات شما نمایش داده می‌شود.</span></div>
+      <label class="toggle"><input type="checkbox" ${CARD.toggles.vcard?'checked':''} onchange="setDeep('toggles.vcard',this.checked)"/><div class="toggle-track"></div></label>
+    </div>`;
+}
+
+function tabLocation(){
+  const loc = CARD.location || (CARD.location={city:'',address:'',mapLink:''});
+  return `
+    <div class="fp-head"><h3>موقعیت مکانی</h3><p>آدرس محل کار یا سکونت شما (اختیاری).</p></div>
+    <div class="field"><label>شهر</label><input type="text" value="${esc(loc.city)}" placeholder="تهران، ایران" oninput="setDeep('location.city',this.value)"/></div>
+    <div class="field"><label>آدرس دقیق</label><input type="text" value="${esc(loc.address)}" oninput="setDeep('location.address',this.value)"/></div>
+    <div class="field"><label>لینک گوگل مپس (اختیاری)</label><input type="url" value="${esc(loc.mapLink)}" placeholder="https://maps.google.com/..." oninput="setDeep('location.mapLink',this.value)"/></div>
+    <div class="toggle-row">
+      <div class="toggle-text"><b>نمایش موقعیت مکانی</b><span>در منوی صفحه دیجیتال نمایش داده شود.</span></div>
+      <label class="toggle"><input type="checkbox" ${CARD.toggles.location?'checked':''} onchange="setDeep('toggles.location',this.checked)"/><div class="toggle-track"></div></label>
+    </div>`;
+}
+
+function tabAppearance(){
+  const th = CARD.theme || (CARD.theme={accentPreset:'blue',cardStyle:'classic',cardColor:'#0d1117',heroColor:'#0d1117'});
+  const swatches = Object.keys(ACCENT_PRESETS).map(key=>{
+    const p = ACCENT_PRESETS[key];
+    const sel = th.accentPreset===key;
+    return `<div class="color-swatch ${sel?'selected':''}" style="background:${p.a};" title="${p.name}" onclick="setDeep('theme.accentPreset','${key}');goTab('appearance')">${icon('check',13)}</div>`;
+  }).join('');
+  const styles = Object.keys(CARD_STYLES).map(key=>{
+    const s = CARD_STYLES[key];
+    const sel = th.cardStyle===key;
+    return `<div class="style-card ${sel?'selected':''}" onclick="setDeep('theme.cardStyle','${key}');goTab('appearance')">${icon(s.icon,20)}<span>${s.name}</span></div>`;
+  }).join('');
+  return `
+    <div class="fp-head"><h3>انتخاب استایل و ظاهر</h3><p>رنگ‌بندی، فونت و استایل صفحه دیجیتال خود را شخصی‌سازی کنید.</p></div>
+    <div class="field"><label>رنگ اصلی</label><div class="swatch-row">${swatches}</div></div>
+    <div class="field"><label>استایل کارت‌ها</label><div class="style-row">${styles}</div></div>
+    <div class="field"><label>رنگ پس‌زمینه کارت</label>
+      <input type="color" value="${th.cardColor||'#0d1117'}" style="width:100%;height:44px;padding:4px;border-radius:10px;cursor:pointer;" oninput="setDeep('theme.cardColor',this.value)"/></div>
+    <div class="field"><label>رنگ پشت عکس پروفایل</label>
+      <input type="color" value="${th.heroColor||'#0d1117'}" style="width:100%;height:44px;padding:4px;border-radius:10px;cursor:pointer;" oninput="setDeep('theme.heroColor',this.value)"/></div>`;
+}
+
+function tabAdvanced(){
+  const t = CARD.toggles || (CARD.toggles={});
+  const rows = [
+    ['bio','نمایش بیوگرافی','متن معرفی کوتاه زیر نام نمایش داده شود'],
+    ['about','نمایش بخش درباره من','در منوی صفحه دیجیتال'],
+    ['services','نمایش بخش خدمات','در منوی صفحه دیجیتال'],
+    ['portfolio','نمایش نمونه‌کارها','در منوی صفحه دیجیتال'],
+    ['social','نمایش شبکه‌های اجتماعی','در منوی صفحه دیجیتال'],
+    ['music','پخش موزیک در هدر کارت','پلیر آهنگ در هدر کارت'],
+    ['email','نمایش ردیف ایمیل','در صفحه اطلاعات تماس'],
+    ['website','نمایش ردیف وبسایت','در صفحه اطلاعات تماس'],
+    ['themePicker','فعال‌سازی انتخاب رنگ توسط بازدیدکننده','امکان تغییر رنگ نمایش (فقط محلی) برای بازدیدکننده']
+  ];
+  return `
+    <div class="fp-head"><h3>تنظیمات پیشرفته</h3><p>بخش‌هایی که در صفحه دیجیتال نمایش داده می‌شوند را مدیریت کنید.</p></div>
+    ${rows.map(([key,label,sub])=>`
+      <div class="toggle-row">
+        <div class="toggle-text"><b>${label}</b><span>${sub}</span></div>
+        <label class="toggle"><input type="checkbox" ${t[key]!==false?'checked':''} onchange="setDeep('toggles.${key}',this.checked)"/><div class="toggle-track"></div></label>
+      </div>`).join('')}`;
+}
+
+
+// ═══════════════════════ Live preview (phone mock) ═══════════════════════
+function renderPreview(){
+  const el = document.getElementById('phoneScreen');
+  if(!el) return;
+  const preset = ACCENT_PRESETS[CARD.theme && CARD.theme.accentPreset] || ACCENT_PRESETS.blue;
+  el.style.setProperty('--p-accent', preset.a);
+  el.style.setProperty('--p-accent2', preset.a2);
+  el.style.setProperty('--p-surface', (CARD.theme && CARD.theme.heroColor) || '#0d1526');
+
+  const phones = (CARD.phones||[]).filter(p=>p&&p.value);
+  const emails = (CARD.emails||[]).filter(e=>e&&e.value);
+  const s = CARD.social||{};
+  const quick = [];
+  if(phones[0]) quick.push(icon('phone',11));
+  if(s.whatsapp) quick.push(iconFill('whatsapp',11));
+  if(s.telegram) quick.push(iconFill('telegram',11));
+  if(s.instagram) quick.push(iconFill('instagram',11));
+  if(emails[0]) quick.push(icon('mail',11));
+
+  const photo = CARD.photoBase64 ? `<img src="${CARD.photoBase64}"/>` : `<div>${icon('user',20)}</div>`;
+
+  el.innerHTML = `
+    <div class="phone-statusbar"><span>9:41</span><span>••••</span></div>
+    <div class="phone-content">
+      <div class="pv-avatar-wrap">
+        <div class="pv-avatar">${photo}</div>
+        ${CARD.verified ? `<div class="pv-badge">${icon('check',8)}</div>` : ''}
+      </div>
+      <div class="pv-name">${esc(CARD.name)||'نام شما'}</div>
+      <div class="pv-role">${esc(CARD.job)||'عنوان شغلی'}</div>
+      ${CARD.bio ? `<div class="pv-bio">${esc(CARD.bio)}</div>` : ''}
+      <div class="pv-quick">${quick.map(q=>`<div class="pv-q-circle">${q}</div>`).join('')}</div>
+      ${CARD.toggles.vcard!==false ? `<div class="pv-save-btn">${icon('user',11)}ذخیره مخاطب</div>` : ''}
+      <div class="pv-foot">Powered by MOHAREZ</div>
+    </div>`;
+}
+
+// ═══════════════════════ Dashboard / Stats / Support ═══════════════════════
+function renderDashboard(){
+  const completion = calcCompletion();
+  return `
+    <div class="dash-grid">
+      <div class="dash-card">${icon('user',18)}<div class="num">${esc(CARD.name)||'—'}</div><div class="lbl">نام فعال روی کارت</div></div>
+      <div class="dash-card">${icon('services',18)}<div class="num">${(CARD.services||[]).length}</div><div class="lbl">خدمت ثبت‌شده</div></div>
+      <div class="dash-card">${icon('portfolio',18)}<div class="num">${(CARD.portfolio||[]).length}</div><div class="lbl">نمونه‌کار ثبت‌شده</div></div>
+    </div>
+    <div class="form-panel" style="margin-bottom:16px;">
+      <div class="fp-head"><h3>وضعیت تکمیل پروفایل</h3><p>هرچه اطلاعات کامل‌تر باشد، کارت حرفه‌ای‌تر دیده می‌شود.</p></div>
+      <div style="height:8px;background:var(--surface3);border-radius:100px;overflow:hidden;margin-bottom:8px;">
+        <div style="height:100%;width:${completion}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;"></div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted2);">${completion}% تکمیل شده</div>
+    </div>
+    <div class="form-panel">
+      <div class="fp-head"><h3>دسترسی سریع</h3><p></p></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="tb-btn-outline" onclick="sidebarGo('editor')">${icon('edit',14)}ویرایش صفحه</button>
+        <button class="tb-btn-outline" onclick="sidebarGo('social')">${icon('link',14)}شبکه‌های اجتماعی</button>
+        <button class="tb-btn-outline" onclick="sidebarGo('appearance')">${icon('palette',14)}ظاهر و استایل</button>
+        <button class="tb-btn-outline" onclick="openPreviewModal()">${icon('layers',14)}پیش‌نمایش</button>
+      </div>
+    </div>`;
+}
+function calcCompletion(){
+  let score=0, total=8;
+  if(CARD.name) score++;
+  if(CARD.job) score++;
+  if(CARD.bio) score++;
+  if(CARD.photoBase64) score++;
+  if((CARD.phones||[]).some(p=>p.value)) score++;
+  if(Object.values(CARD.social||{}).some(v=>v)) score++;
+  if((CARD.services||[]).length) score++;
+  if((CARD.portfolio||[]).length) score++;
+  return Math.round(score/total*100);
+}
+function renderStats(){
+  return `<div class="form-panel"><div class="placeholder-box">${icon('chart',40)}<p>آمار بازدید به‌زودی فعال می‌شود.<br/>این بخش نیاز به یک سرویس تحلیل بازدید دارد که در نسخه بعدی اضافه خواهد شد.</p></div></div>`;
+}
+function renderSupport(){
+  return `<div class="form-panel">
+    <div class="fp-head"><h3>پشتیبانی</h3><p>در صورت بروز هرگونه مشکل یا سوال، از راه‌های زیر با ما در ارتباط باشید.</p></div>
+    <div class="support-list">
+      <a class="support-item" href="https://t.me/Computer_MF_2005" target="_blank">${icon('telegram',17)}<div><b>پشتیبانی تلگرام</b><span>پاسخ‌گویی سریع</span></div></a>
+      <a class="support-item" href="mailto:mhmdamyfrsa2005@gmail.com">${icon('mail',17)}<div><b>ایمیل پشتیبانی</b><span>mhmdamyfrsa2005@gmail.com</span></div></a>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════ Local persistence ═══════════════════════
+const LOCAL_DATA_KEY = 'moharez_panel_data_v2';
+function saveLocalPanelData(){ try{ localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(CARD)); }catch(e){} }
+function restoreLocalPanelData(){
+  try{
+    const raw = localStorage.getItem(LOCAL_DATA_KEY);
+    if(raw) CARD = deepMerge(JSON.parse(JSON.stringify(DEFAULT_DATA)), JSON.parse(raw));
+  }catch(e){}
+}
+
+// ═══════════════════════ GitHub sync ═══════════════════════
+const GH_CONFIG_KEY = 'moharez_gh_config';
+function loadGHConfig(){ try{ const r=localStorage.getItem(GH_CONFIG_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function renderGHStatus(){
+  const cfg = loadGHConfig();
+  const el = document.getElementById('ghStatus'); if(!el) return;
+  if(cfg && cfg.owner && cfg.repo && cfg.token){
+    el.textContent = `متصل به ${cfg.owner}/${cfg.repo} (${cfg.branch||'main'})`;
+    el.style.color='var(--green)'; el.style.borderColor='rgba(34,197,94,.3)';
+  } else {
+    el.textContent = 'متصل نیست — فیلدها را پر کنید';
+    el.style.color='var(--muted2)'; el.style.borderColor='var(--border2)';
+  }
+}
+function restoreGHConfigFields(){
+  const cfg = loadGHConfig();
+  if(cfg){
+    document.getElementById('gh_owner').value = cfg.owner||'';
+    document.getElementById('gh_repo').value = cfg.repo||'';
+    document.getElementById('gh_branch').value = cfg.branch||'main';
+    document.getElementById('gh_path').value = cfg.path||'data.json';
+    document.getElementById('gh_token').value = cfg.token||'';
+  }
+  renderGHStatus();
+}
+function saveGHConfig(){
+  const cfg = {
+    owner: document.getElementById('gh_owner').value.trim(),
+    repo: document.getElementById('gh_repo').value.trim(),
+    branch: document.getElementById('gh_branch').value.trim()||'main',
+    path: document.getElementById('gh_path').value.trim()||'data.json',
+    token: document.getElementById('gh_token').value.trim()
+  };
+  if(!cfg.owner || !cfg.repo || !cfg.token){ showToast('نام کاربری، ریپو و توکن را پر کنید'); return; }
+  localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(cfg));
+  renderGHStatus();
+  showToast('تنظیمات اتصال ذخیره شد ✓');
+  closeGHModal();
+}
+function b64ToUtf8(b64){ return decodeURIComponent(escape(atob(b64.replace(/\n/g,'')))); }
+function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+async function fetchDataFromGitHub(){
+  const cfg = loadGHConfig();
+  if(!cfg || !cfg.owner || !cfg.repo || !cfg.token) return null;
+  const path = cfg.path||'data.json', branch = cfg.branch||'main';
+  const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`;
+  try{
+    const resp = await fetch(apiUrl, { headers:{ 'Authorization':`token ${cfg.token}`, 'Accept':'application/vnd.github+json' } });
+    if(!resp.ok) return null;
+    const j = await resp.json();
+    if(!j.content) return null;
+    return JSON.parse(b64ToUtf8(j.content));
+  }catch(e){ return null; }
+}
+async function loadLatestSavedData(){
+  const remote = await fetchDataFromGitHub();
+  if(remote){
+    CARD = deepMerge(JSON.parse(JSON.stringify(DEFAULT_DATA)), remote);
+    saveLocalPanelData();
+    renderAll();
+    showToast('آخرین اطلاعات از گیت‌هاب بارگذاری شد ✓');
+  } else {
+    restoreLocalPanelData();
+    renderAll();
+  }
+}
+async function saveToGitHub(){
+  saveLocalPanelData();
+  const cfg = loadGHConfig();
+  if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+    showToast('اول تنظیمات اتصال گیت‌هاب را کامل کنید');
+    openGHModal();
+    return false;
+  }
+  const path = cfg.path||'data.json', branch = cfg.branch||'main';
+  const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(path)}`;
+  showToast('در حال ارسال به گیت‌هاب...');
+  try{
+    let sha=null, existingData={};
+    const getResp = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers:{ 'Authorization':`token ${cfg.token}`, 'Accept':'application/vnd.github+json' } });
+    if(getResp.status===200){
+      const gd = await getResp.json();
+      sha = gd.sha;
+      if(gd.content){ try{ existingData = JSON.parse(b64ToUtf8(gd.content)); }catch(e){ existingData={}; } }
+    } else if(getResp.status!==404){
+      const eb = await getResp.json().catch(()=>({}));
+      throw new Error(eb.message || ('خطا در خواندن فایل (کد '+getResp.status+')'));
+    }
+    const merged = deepMerge(existingData, CARD);
+    const jsonStr = JSON.stringify(merged, null, 2);
+    const putBody = { message:'بروزرسانی از پنل مهارز', content: utf8ToB64(jsonStr), branch };
+    if(sha) putBody.sha = sha;
+    const putResp = await fetch(apiUrl, { method:'PUT', headers:{ 'Authorization':`token ${cfg.token}`, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' }, body: JSON.stringify(putBody) });
+    if(!putResp.ok){ const eb = await putResp.json().catch(()=>({})); throw new Error(eb.message || ('خطای گیت‌هاب (کد '+putResp.status+')')); }
+    markSaved();
+    showToast('مستقیم روی گیت‌هاب ذخیره شد ✓');
+    return true;
+  }catch(e){ showToast('خطا: '+e.message); return false; }
+}
+function openGHModal(){ restoreGHConfigFields(); document.getElementById('ghOverlay').classList.add('open'); }
+function closeGHModal(){ document.getElementById('ghOverlay').classList.remove('open'); }
+
+// ═══════════════════════ Preview modal ═══════════════════════
+function buildPreviewHTML(){
+  const preset = ACCENT_PRESETS[CARD.theme && CARD.theme.accentPreset] || ACCENT_PRESETS.blue;
+  const surface = (CARD.theme && CARD.theme.heroColor) || '#0d1526';
+  const photo = CARD.photoBase64 ? `<img src="${CARD.photoBase64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>` : `<div style="width:100%;height:100%;border-radius:50%;background:#131f38;display:flex;align-items:center;justify-content:center;color:#5b6b8a;">${icon('user',30)}</div>`;
+  const phones=(CARD.phones||[]).filter(p=>p&&p.value), emails=(CARD.emails||[]).filter(e=>e&&e.value), s=CARD.social||{};
+  const quick=[];
+  if(phones[0]) quick.push(icon('phone',15));
+  if(s.whatsapp) quick.push(iconFill('whatsapp',15));
+  if(s.telegram) quick.push(iconFill('telegram',15));
+  if(s.instagram) quick.push(iconFill('instagram',15));
+  if(emails[0]) quick.push(icon('mail',15));
+  return `<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="UTF-8"/>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>*{box-sizing:border-box;margin:0;padding:0;}body{background:${surface};font-family:'Vazirmatn',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;color:#f1f5f9;}
+  .wrap{text-align:center;max-width:300px;}
+  .av{width:100px;height:100px;margin:0 auto 14px;border-radius:50%;padding:3px;background:conic-gradient(from 180deg,${preset.a},${preset.a2},${preset.a});}
+  .name{font-size:19px;font-weight:800;}.role{font-size:12px;color:${preset.a2};margin-top:4px;}
+  .bio{font-size:11px;color:#8b9bbd;margin-top:10px;line-height:1.8;}
+  .q{display:flex;justify-content:center;gap:8px;margin-top:16px;}
+  .qc{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:${preset.a2};}
+  .sv{margin-top:18px;padding:12px;border-radius:12px;background:linear-gradient(135deg,${preset.a},${preset.a2});color:#fff;font-size:12px;font-weight:700;}
+  </style></head><body><div class="wrap">
+  <div class="av">${photo}</div>
+  <div class="name">${esc(CARD.name)||'نام شما'}</div>
+  <div class="role">${esc(CARD.job)||''}</div>
+  ${CARD.bio?`<div class="bio">${esc(CARD.bio)}</div>`:''}
+  <div class="q">${quick.map(q=>`<div class="qc">${q}</div>`).join('')}</div>
+  ${CARD.toggles.vcard!==false?'<div class="sv">افزودن به مخاطبین</div>':''}
+  </div></body></html>`;
+}
+function openPreviewModal(){
+  document.getElementById('previewFrame').srcdoc = buildPreviewHTML();
+  document.getElementById('previewOverlay').classList.add('open');
+}
+function closePreviewModal(){ document.getElementById('previewOverlay').classList.remove('open'); }
+
+// ═══════════════════════ Toast / status ═══════════════════════
+let savedState = false;
+function markUnsaved(){ savedState = false; }
+function markSaved(){ savedState = true; }
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════ Theme (panel dark/light) ═══════════════════════
+function initPanelTheme(){
+  const isLight = localStorage.getItem('moharez_panel_theme')==='light';
+  document.body.classList.toggle('light', isLight);
+  updatePanelThemeIcon();
+}
+function togglePanelTheme(){
+  document.body.classList.toggle('light');
+  localStorage.setItem('moharez_panel_theme', document.body.classList.contains('light')?'light':'dark');
+  updatePanelThemeIcon();
+}
+function updatePanelThemeIcon(){
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('panelThemeIcon').innerHTML = isLight ? ICONS.moon : ICONS.sun;
+}
+
+// ═══════════════════════ Login gate ═══════════════════════
+const PANEL_PASSWORD = 'amin84';
+function attemptLogin(){
+  const val = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  const label = btn.querySelector('span');
+  const msg = document.getElementById('loginMsg');
+  if(val === PANEL_PASSWORD){
+    btn.classList.remove('login-err'); btn.classList.add('login-ok');
+    label.textContent = 'خوش آمدید، دسترسی تایید شد';
+    msg.textContent = '';
+    localStorage.setItem('moharez_panel_auth','true');
+    document.documentElement.classList.add('authed');
+    setTimeout(()=>{ document.getElementById('loginOverlay').style.display='none'; }, 650);
+  } else {
+    btn.classList.remove('login-ok'); btn.classList.add('login-err');
+    label.textContent = 'رمز عبور نادرست است';
+    msg.textContent = 'لطفاً رمز عبور را دوباره بررسی و وارد کنید.';
+    document.getElementById('loginPass').value=''; document.getElementById('loginPass').focus();
+    setTimeout(()=>{ btn.classList.remove('login-err'); label.textContent='ورود به پنل'; }, 1800);
+  }
+}
+function logoutPanel(){
+  if(!confirm('از پنل مدیریت خارج می‌شوید. برای ورود مجدد، رمز عبور لازم است. ادامه می‌دهید؟')) return;
+  localStorage.removeItem('moharez_panel_auth');
+  document.documentElement.classList.remove('authed');
+  const overlay = document.getElementById('loginOverlay');
+  overlay.style.display = 'flex';
+  const btn = document.getElementById('loginBtn');
+  btn.className = 'login-btn';
+  btn.querySelector('span').textContent = 'ورود به پنل';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginMsg').textContent='';
+}
+
+// ═══════════════════════ Init ═══════════════════════
+initPanelTheme();
+renderSidebar();
+loadLatestSavedData();
+</script>
+</body>
+</html>
